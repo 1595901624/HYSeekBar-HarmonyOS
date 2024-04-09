@@ -1,5 +1,5 @@
 {
-  "name": "@cloris/hyseekbar",
+  "name": "hyseekbar",
   "version": "1.0.0",
   "description": "This is a seek bar widget.",
   "main": "Index.ets",
