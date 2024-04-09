@@ -1,9 +1,15 @@
 {
-  "name": "hyseekbar",
+  "name": "@cloris/hyseekbar",
   "version": "1.0.0",
   "description": "This is a seek bar widget.",
   "main": "Index.ets",
-  "author": "",
-  "license": "Apache-2.0",
+  "author": "cloris",
+  "license": "AGPL-v3.0",
+  "repository": "https://github.com/1595901624/HYSeekBar-HarmonyOS.git",
+  "tags": [
+    "Component",
+    "SeekBar",
+    "ProgressBar"
+  ],
   "dependencies": {}
 }
