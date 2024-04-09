@@ -28,14 +28,21 @@ export struct HYSeekBar {
   /**
    * 滑块的圆角
    */
-  @Prop radius: number = 40
-  @Prop layoutWidth: number = 200
-  @Prop layoutHeight: number = 80
+  radius: number = 40
+  barWidth: number = 200
+  barHeight: number = 80
   /**
    * 滑块的颜色
    */
   @Prop selectedColorList: string[] = ["#FFFFFF", "#FFFFFF"]
-  @Prop barDirection: HYSeekBarDirection = HYSeekBarDirection.HORIZONTAL
+  /**
+   * 滑块的方向
+   */
+  barDirection: HYSeekBarDirection = HYSeekBarDirection.HORIZONTAL
+  /**
+   * 滑块是否翻转
+   */
+  @State reverse: boolean = false
   // ***************************************以下属性私有 START************************************************
   private settings: RenderingContextSettings = new RenderingContextSettings(true)
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
@@ -65,8 +72,8 @@ export struct HYSeekBar {
 
   build() {
     Canvas(this.context)
-      .width(this.layoutWidth)
-      .height(this.layoutHeight)
+      .width(this.barWidth)
+      .height(this.barHeight)
       .onReady(() => {
         this.init();
         this.draw();
@@ -93,7 +100,7 @@ export struct HYSeekBar {
         }
         this._percent = this._slideOffsetX / this.context.width;
         // this.onScrolling(percent)
-        this.draw()
+        // this.draw()
         this._touchX = event.touches[0].x;
         this._touchY = event.touches[0].y;
         this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Begin, true, this._percent)
@@ -101,30 +108,40 @@ export struct HYSeekBar {
       }
         break;
       case TouchType.Up:
+        this._touchX = event.touches[0].x;
+        this._touchY = event.touches[0].y;
         this.onSlideEnd();
         break;
       case TouchType.Move: {
         // 判断滑动方向
         let tempTouchX = event.touches[0].x;
         let tempTouchY = event.touches[0].y;
-        // if (Math.abs(tempTouchX - this._touchX) > Math.abs(tempTouchY - this._touchY)) {
-        //   // 横向滑动
-        //   // this._isHorizontal = true;
-        // } else {
-        //   // 纵向滑动
-        //   // this._isHorizontal = false;
-        // }
+        // 根据方向获取滑动距离
         if (this.barDirection === HYSeekBarDirection.HORIZONTAL) {
           // 当前 Bar 的方向是横向
-          let slideDistance = this._slideOffsetX + (tempTouchX - this._touchX)
-          if (slideDistance <= 0) {
-            this._slideOffsetX = 0;
-          } else if (slideDistance > this.context.width) {
-            this._slideOffsetX = this.context.width
+
+          if (this.reverse) {
+            let slideDistance = this._slideOffsetX + (this._touchX - tempTouchX)
+            console.log("slideDistance: " + (this._touchX - tempTouchX))
+            if (slideDistance <= 0) {
+              this._slideOffsetX = 0;
+            } else if (slideDistance > this.context.width) {
+              this._slideOffsetX = this.context.width
+            } else {
+              this._slideOffsetX = slideDistance;
+            }
+            this._percent = this._slideOffsetX / this.context.width;
           } else {
-            this._slideOffsetX = slideDistance;
+            let slideDistance = this._slideOffsetX + (tempTouchX - this._touchX)
+            if (slideDistance <= 0) {
+              this._slideOffsetX = 0;
+            } else if (slideDistance > this.context.width) {
+              this._slideOffsetX = this.context.width
+            } else {
+              this._slideOffsetX = slideDistance;
+            }
+            this._percent = this._slideOffsetX / this.context.width;
           }
-          this._percent = this._slideOffsetX / this.context.width;
         } else {
           // 当前 Bar 的方向是纵向
           let slideDistance = this._slideOffsetY + (tempTouchY - this._touchY);
@@ -137,13 +154,14 @@ export struct HYSeekBar {
           }
         }
         this.onScrolling(this._percent);
-        this._touchX = event.touches[0].x;
-        this._touchY = event.touches[0].y;
+        this._touchX = tempTouchX;
+        this._touchY = tempTouchY;
         this.draw()
       }
         break;
       case TouchType.Cancel:
-
+        this._touchX = event.touches[0].x;
+        this._touchY = event.touches[0].y;
         break;
 
       default:
@@ -184,7 +202,11 @@ export struct HYSeekBar {
     this.context.fillStyle = grad
 
     if (this.barDirection === HYSeekBarDirection.HORIZONTAL) {
-      this.context.fillRect(0, 0, this._slideOffsetX, this.context.height)
+      if (this.reverse) {
+        this.context.fillRect(this.context.width - this._slideOffsetX, 0, this._slideOffsetX, this.context.height)
+      } else {
+        this.context.fillRect(0, 0, this._slideOffsetX, this.context.height)
+      }
     } else {
       this.context.fillRect(0, 0, this.context.width, this._slideOffsetY)
     }

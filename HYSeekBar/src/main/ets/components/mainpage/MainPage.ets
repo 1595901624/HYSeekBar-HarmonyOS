@@ -11,9 +11,11 @@ export struct MainPage {
     Row() {
       Column() {
         HYSeekBar({
-          layoutWidth:30,
-          layoutHeight: 200,
-          barDirection: HYSeekBarDirection.VERTICAL
+          value: 10,
+          barWidth:230,
+          barHeight: 40,
+          reverse: false,
+          barDirection: HYSeekBarDirection.HORIZONTAL
         })
       }
       .width('100%')
