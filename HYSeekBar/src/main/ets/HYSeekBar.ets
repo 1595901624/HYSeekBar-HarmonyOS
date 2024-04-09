@@ -144,13 +144,24 @@ export struct HYSeekBar {
           }
         } else {
           // 当前 Bar 的方向是纵向
-          let slideDistance = this._slideOffsetY + (tempTouchY - this._touchY);
-          if (slideDistance <= 0) {
-            this._slideOffsetY = 0;
-          } else if (slideDistance > this.context.height) {
-            this._slideOffsetY = this.context.height
+          if (this.reverse) {
+            let slideDistance = this._slideOffsetY + (this._touchY - tempTouchY);
+            if (slideDistance <= 0) {
+              this._slideOffsetY = 0;
+            } else if (slideDistance > this.context.height) {
+              this._slideOffsetY = this.context.height
+            } else {
+              this._slideOffsetY = slideDistance;
+            }
           } else {
-            this._slideOffsetY = slideDistance;
+            let slideDistance = this._slideOffsetY + (tempTouchY - this._touchY);
+            if (slideDistance <= 0) {
+              this._slideOffsetY = 0;
+            } else if (slideDistance > this.context.height) {
+              this._slideOffsetY = this.context.height
+            } else {
+              this._slideOffsetY = slideDistance;
+            }
           }
         }
         this.onScrolling(this._percent);
@@ -208,7 +219,11 @@ export struct HYSeekBar {
         this.context.fillRect(0, 0, this._slideOffsetX, this.context.height)
       }
     } else {
-      this.context.fillRect(0, 0, this.context.width, this._slideOffsetY)
+      if (this.reverse) {
+        this.context.fillRect(0, this.context.height - this._slideOffsetY, this.context.width, this._slideOffsetY)
+      } else {
+        this.context.fillRect(0, 0, this.context.width, this._slideOffsetY)
+      }
     }
   }
 
