@@ -29,7 +29,13 @@ export struct HYSeekBar {
    * 滑块的圆角
    */
   radius: number = 40
+  /**
+   * 滑轨的宽度
+   */
   barWidth: number = 200
+  /**
+   * 滑轨的高度
+   */
   barHeight: number = 80
   /**
    * 滑块的颜色
