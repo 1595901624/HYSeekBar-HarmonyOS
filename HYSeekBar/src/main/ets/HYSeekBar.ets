@@ -67,7 +67,7 @@ export struct HYSeekBar {
   valueUpdated() {
     this.init()
     this.draw()
-    this.onChange?.(SeekBarSliderChangeMode.Moving, this.getCallbackValue(), false, this._percent)
+    // this.onChange?.(SeekBarSliderChangeMode.Moving, this.getCallbackValue(), false, this._percent)
   }
 
   build() {
@@ -103,8 +103,8 @@ export struct HYSeekBar {
         // this.draw()
         this._touchX = event.touches[0].x;
         this._touchY = event.touches[0].y;
-        this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Begin, true, this._percent)
-        this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Click, true, this._percent)
+        // this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Begin, true, this._percent)
+        // this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Click, true, this._percent)
       }
         break;
       case TouchType.Up:
@@ -130,7 +130,6 @@ export struct HYSeekBar {
             } else {
               this._slideOffsetX = slideDistance;
             }
-            this._percent = this._slideOffsetX / this.context.width;
           } else {
             let slideDistance = this._slideOffsetX + (tempTouchX - this._touchX)
             if (slideDistance <= 0) {
@@ -140,8 +139,8 @@ export struct HYSeekBar {
             } else {
               this._slideOffsetX = slideDistance;
             }
-            this._percent = this._slideOffsetX / this.context.width;
           }
+          this._percent = this._slideOffsetX / this.context.width;
         } else {
           // 当前 Bar 的方向是纵向
           if (this.reverse) {
@@ -163,6 +162,7 @@ export struct HYSeekBar {
               this._slideOffsetY = slideDistance;
             }
           }
+          this._percent = this._slideOffsetY / this.context.height;
         }
         this.onScrolling(this._percent);
         this._touchX = tempTouchX;
@@ -206,7 +206,7 @@ export struct HYSeekBar {
    * @param radius
    */
   drawProgressBar() {
-    console.log('drawProgressBar', this.selectedColorList[0])
+    // console.log('drawProgressBar', this.selectedColorList[0])
     let grad = this.context.createLinearGradient(0, 0, this.context.width, this.context.height)
     grad.addColorStop(0.0, this.selectedColorList[0])
     grad.addColorStop(1.0, this.selectedColorList[1])
@@ -232,15 +232,15 @@ export struct HYSeekBar {
    * @param percent
    */
   onScrolling(percent: number) {
-    this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Moving, true, this._percent)
-    console.log('onScrolling: ' + percent)
+    this.onChange?.(SeekBarSliderChangeMode.Moving, this.getCallbackValue(), true, this._percent)
+    // console.log('onScrolling: ' + percent)
   }
 
   /**
    * 滑动结束
    */
   onSlideEnd() {
-    this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.End, true, this._percent)
+    this.onChange?.(SeekBarSliderChangeMode.End, this.getCallbackValue(), true, this._percent)
   }
 
   /**

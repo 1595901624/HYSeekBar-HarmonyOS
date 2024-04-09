@@ -5,6 +5,9 @@
   "main": "",
   "author": "",
   "license": "",
-  "dependencies": {}
+  "dependencies": {
+//    "HYSeekBar": "file:../lib/HYSeekBar.har"
+    "HYSeekBar": "file:../HYSeekBar"
+  }
 }
 
