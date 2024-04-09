@@ -1,3 +1,5 @@
+import { HYSeekBarDirection } from './HYSeekBarDirection'
+import { rectUtil } from './RectUtil'
 import { SeekBarSliderChangeMode } from './SeekBarSliderChangeMode'
 
 @Component
@@ -22,7 +24,7 @@ export struct HYSeekBar {
   /**
    * 滑轨的颜色
    */
-  @Prop trackColor: string = "#FFFFFF"
+  @Prop trackColor: string = "#F2F2F2"
   /**
    * 滑块的圆角
    */
@@ -32,12 +34,15 @@ export struct HYSeekBar {
   /**
    * 滑块的颜色
    */
-  @Prop selectedColorList: string[] = ["#fffc23f0", "#ff4df170"]
+  @Prop selectedColorList: string[] = ["#FFFFFF", "#FFFFFF"]
+  @Prop barDirection: HYSeekBarDirection = HYSeekBarDirection.HORIZONTAL
   // ***************************************以下属性私有 START************************************************
   private settings: RenderingContextSettings = new RenderingContextSettings(true)
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
   @State private _slideOffsetX: number = 20
+  @State private _slideOffsetY: number = 20
   private _touchX: number = 0
+  private _touchY: number = 0
   @State private _percent: number = 0
   // ***************************************以上属性私有 E N D************************************************
   /**
@@ -90,6 +95,7 @@ export struct HYSeekBar {
         // this.onScrolling(percent)
         this.draw()
         this._touchX = event.touches[0].x;
+        this._touchY = event.touches[0].y;
         this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Begin, true, this._percent)
         this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Click, true, this._percent)
       }
@@ -98,21 +104,41 @@ export struct HYSeekBar {
         this.onSlideEnd();
         break;
       case TouchType.Move: {
+        // 判断滑动方向
         let tempTouchX = event.touches[0].x;
-        // let stepSize = this.max / this.step;
-        let slideDistance = this._slideOffsetX + (tempTouchX - this._touchX)
-        if (slideDistance <= 0) {
-          this._slideOffsetX = 0;
-        } else if (slideDistance > this.context.width) {
-          this._slideOffsetX = this.context.width
+        let tempTouchY = event.touches[0].y;
+        // if (Math.abs(tempTouchX - this._touchX) > Math.abs(tempTouchY - this._touchY)) {
+        //   // 横向滑动
+        //   // this._isHorizontal = true;
+        // } else {
+        //   // 纵向滑动
+        //   // this._isHorizontal = false;
+        // }
+        if (this.barDirection === HYSeekBarDirection.HORIZONTAL) {
+          // 当前 Bar 的方向是横向
+          let slideDistance = this._slideOffsetX + (tempTouchX - this._touchX)
+          if (slideDistance <= 0) {
+            this._slideOffsetX = 0;
+          } else if (slideDistance > this.context.width) {
+            this._slideOffsetX = this.context.width
+          } else {
+            this._slideOffsetX = slideDistance;
+          }
+          this._percent = this._slideOffsetX / this.context.width;
         } else {
-          // const x = Math.round(slideDistance * 1.0 / this.step) * this.step
-          // this._slideOffsetX = x;
-          this._slideOffsetX = slideDistance;
+          // 当前 Bar 的方向是纵向
+          let slideDistance = this._slideOffsetY + (tempTouchY - this._touchY);
+          if (slideDistance <= 0) {
+            this._slideOffsetY = 0;
+          } else if (slideDistance > this.context.height) {
+            this._slideOffsetY = this.context.height
+          } else {
+            this._slideOffsetY = slideDistance;
+          }
         }
-        this._percent = this._slideOffsetX / this.context.width;
         this.onScrolling(this._percent);
         this._touchX = event.touches[0].x;
+        this._touchY = event.touches[0].y;
         this.draw()
       }
         break;
@@ -140,7 +166,7 @@ export struct HYSeekBar {
    * 绘制背景
    */
   drawRoundBackground() {
-    this.fillRoundRect(this.context, 0, 0, this.context.width, this.context.height, this.radius, this.trackColor)
+    rectUtil.fillRoundRect(this.context, 0, 0, this.context.width, this.context.height, this.radius, this.trackColor)
   }
 
   /**
@@ -156,67 +182,12 @@ export struct HYSeekBar {
     grad.addColorStop(0.0, this.selectedColorList[0])
     grad.addColorStop(1.0, this.selectedColorList[1])
     this.context.fillStyle = grad
-    this.context.fillRect(0, 0, this._slideOffsetX, this.context.height)
-  }
 
-  /**该方法用来绘制一个有填充色的圆角矩形
-   * @param cxt:canvas的上下文环境
-   * @param x:左上角x轴坐标
-   * @param y:左上角y轴坐标
-   * @param width:矩形的宽度
-   * @param height:矩形的高度
-   * @param radius:圆的半径
-   * @param fillColor:填充颜色
-   **/
-  fillRoundRect(cxt: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, fillColor: string) {
-    //圆的直径必然要小于矩形的宽高
-    if (2 * radius > width || 2 * radius > height) {
-      radius = Math.min(width / 2, height / 2)
+    if (this.barDirection === HYSeekBarDirection.HORIZONTAL) {
+      this.context.fillRect(0, 0, this._slideOffsetX, this.context.height)
+    } else {
+      this.context.fillRect(0, 0, this.context.width, this._slideOffsetY)
     }
-
-    cxt.save();
-    cxt.translate(x, y);
-    //绘制圆角矩形的各个边
-    this.drawRoundRectPath(cxt, width, height, radius);
-
-    cxt.fillStyle = fillColor || "#000"; //若是给定了值就用给定的值否则给予默认值
-    cxt.fill()
-    cxt.restore();
-  }
-
-  /**
-   * 绘制圆角矩形
-   * @param ctx
-   * @param width
-   * @param height
-   * @param radius
-   */
-  drawRoundRectPath(ctx: CanvasRenderingContext2D, width: number, height: number, radius: number) {
-    ctx.beginPath();
-    //从右下角顺时针绘制，弧度从0到1/2PI
-    ctx.arc(width - radius, height - radius, radius, 0, Math.PI / 2);
-
-    //矩形下边线
-    ctx.lineTo(radius, height);
-
-    //左下角圆弧，弧度从1/2PI到PI
-    ctx.arc(radius, height - radius, radius, Math.PI / 2, Math.PI);
-
-    //矩形左边线
-    ctx.lineTo(0, radius);
-
-    //左上角圆弧，弧度从PI到3/2PI
-    ctx.arc(radius, radius, radius, Math.PI, Math.PI * 3 / 2);
-
-    //上边线
-    ctx.lineTo(width - radius, 0);
-
-    //右上角圆弧
-    ctx.arc(width - radius, radius, radius, Math.PI * 3 / 2, Math.PI * 2);
-
-    //右边线
-    ctx.lineTo(width, height - radius);
-    ctx.closePath();
   }
 
   /**
