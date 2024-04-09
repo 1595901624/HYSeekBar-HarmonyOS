@@ -1,0 +1,9 @@
+{
+  "name": "hyseekbar",
+  "version": "1.0.0",
+  "description": "This is a seek bar widget.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}
