@@ -5,13 +5,21 @@ import { HYSeekBar, HYSeekBarDirection } from 'HYSeekBar';
 @Preview
 struct Index {
   @State message: string = 'Hello World';
+  @State value: number = 10
+  @State dynamicValue : number = 20
+
+  aboutToAppear(): void {
+    // setInterval(() => {
+    //   this.dynamicValue = this.dynamicValue + 10;
+    // }, 1000)
+  }
 
   build() {
     Column() {
 
       Column() {
         HYSeekBar({
-          value: 40,
+          value: this.dynamicValue,
           radius: 20,
           barWidth: 40,
           barHeight: 140,
@@ -37,7 +45,7 @@ struct Index {
 
       Column() {
         HYSeekBar({
-          value: 40,
+          value: this.value,
           radius: 20,
           barWidth: 40,
           barHeight: 140,
@@ -61,7 +69,7 @@ struct Index {
 
       Column() {
         HYSeekBar({
-          value: 40,
+          value: this.value,
           radius: 20,
           barWidth: 140,
           barHeight: 40,
@@ -87,7 +95,7 @@ struct Index {
 
       Column() {
         HYSeekBar({
-          value: 40,
+          value: this.value,
           radius: 20,
           barWidth: 140,
           barHeight: 40,

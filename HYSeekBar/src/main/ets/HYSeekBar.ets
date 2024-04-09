@@ -43,15 +43,10 @@ export struct HYSeekBar {
    * 滑块是否翻转
    */
   @State reverse: boolean = false
-  // ***************************************以下属性私有 START************************************************
-  private settings: RenderingContextSettings = new RenderingContextSettings(true)
-  private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
-  @State private _slideOffsetX: number = 20
-  @State private _slideOffsetY: number = 20
-  private _touchX: number = 0
-  private _touchY: number = 0
-  @State private _percent: number = 0
-  // ***************************************以上属性私有 E N D************************************************
+  /**
+   * 点击是否可触发滑条变更，默认为 false
+   */
+  @State clickEnable: boolean = false;
   /**
    * 滑块改变时触发
    * @param mode 改变模式
@@ -60,14 +55,30 @@ export struct HYSeekBar {
    * @param percent 百分比
    */
   onChange?: (mode: SeekBarSliderChangeMode, value: number, fromUser: boolean, percent: number) => void
+  // ***************************************以下属性私有 START************************************************
+  private settings: RenderingContextSettings = new RenderingContextSettings(true)
+  private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
+  @State private _slideOffsetX: number = 20
+  @State private _slideOffsetY: number = 20
+  private _touchX: number = 0
+  private _touchY: number = 0
+  @State private _percent: number = 0
+  @State private isMoving: boolean = false
+
+  // ***************************************以上属性私有 E N D************************************************
+
 
   /**
    * 值刷新
    */
   valueUpdated() {
+    if (this.isMoving) {
+      return;
+    }
+    console.log("onChange: valueUpdated")
     this.init()
     this.draw()
-    // this.onChange?.(SeekBarSliderChangeMode.Moving, this.getCallbackValue(), false, this._percent)
+    this.onChange?.(SeekBarSliderChangeMode.Moving, this.getCallbackValue(), false, this._percent)
   }
 
   build() {
@@ -89,28 +100,42 @@ export struct HYSeekBar {
   handleTouchEvent(event: TouchEvent) {
     switch (event.type) {
       case TouchType.Down: {
-        let slideDistance = event.touches[0].x
-        if (slideDistance <= 0) {
-          this._slideOffsetX = 0;
-        } else if (slideDistance > this.context.width) {
-          this._slideOffsetX = this.context.width
+        this.isMoving = true;
+
+        if (this.barDirection === HYSeekBarDirection.HORIZONTAL) {
+          let slideDistance = event.touches[0].x
+          if (slideDistance <= 0) {
+            this._slideOffsetX = 0;
+          } else if (slideDistance > this.context.width) {
+            this._slideOffsetX = this.context.width
+          } else {
+            this._slideOffsetX = slideDistance;
+          }
+          this._percent = this._slideOffsetX / this.context.width;
         } else {
-          // const x = Math.floor(slideDistance * 1.0 / this.step) * this.step
-          this._slideOffsetX = slideDistance;
+          let slideDistance = event.touches[0].y
+          if (slideDistance <= 0) {
+            this._slideOffsetY = 0;
+          } else if (slideDistance > this.context.height) {
+            this._slideOffsetY = this.context.height
+          } else {
+            this._slideOffsetY = slideDistance;
+          }
+          this._percent = this._slideOffsetY / this.context.height;
         }
-        this._percent = this._slideOffsetX / this.context.width;
-        // this.onScrolling(percent)
-        // this.draw()
         this._touchX = event.touches[0].x;
         this._touchY = event.touches[0].y;
-        // this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Begin, true, this._percent)
-        // this.onChange?.(this.getCallbackValue(), SeekBarSliderChangeMode.Click, true, this._percent)
+        this.onChange?.(SeekBarSliderChangeMode.Begin, this.getCallbackValue(), true, this._percent)
+        if (this.clickEnable) {
+          this.onChange?.(SeekBarSliderChangeMode.Click, this.getCallbackValue(), true, this._percent)
+        }
       }
         break;
       case TouchType.Up:
         this._touchX = event.touches[0].x;
         this._touchY = event.touches[0].y;
         this.onSlideEnd();
+        this.isMoving = false;
         break;
       case TouchType.Move: {
         // 判断滑动方向
@@ -274,8 +299,15 @@ export struct HYSeekBar {
       this.max = 100;
     }
 
+
     // 初始化滑块位置
-    this._slideOffsetX = (this.value - this.min) / (this.max - this.min) * this.context.width
+    if (this.barDirection === HYSeekBarDirection.HORIZONTAL) {
+      this._slideOffsetX = (this.value - this.min) / (this.max - this.min) * this.context.width
+      this._percent = this._slideOffsetX / this.context.width
+    } else {
+      this._slideOffsetY = (this.value - this.min) / (this.max - this.min) * this.context.height
+      this._percent = this._slideOffsetY / this.context.height
+    }
 
     // 修正颜色数组
     const selectedColorListLength = this.selectedColorList.length
