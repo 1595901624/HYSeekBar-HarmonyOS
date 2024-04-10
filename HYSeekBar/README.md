@@ -10,7 +10,7 @@
 
 ## 预览
 
-![](./demo/demo1.png)
+![](https://raw.githubusercontent.com/1595901624/HYSeekBar-HarmonyOS/main/demo/demo1.png)
 
 ## 属性
 
@@ -34,7 +34,19 @@
 | --- | --- | --- | --- | --- |
 | onChange | (mode: SeekBarSliderChangeMode, value: number, fromUser: boolean, percent: number) => void | - | 滑块改变时触发 | 否 |
 
+## 安装
+
+执行安装命令
+```
+ohpm install @cloris/seekbar
+```
+
 ## 使用方法
+1. 在项目中引入 HYSeekBar
+```
+import { HYSeekBar, HYSeekBarDirection } from '@cloris/seekbar';
+```
+2. 在布局中使用 HYSeekBar
 ```
 // 垂直方向, 逆向-滑动从下到上，该示例模仿 iOS 亮度调节
 HYSeekBar({
