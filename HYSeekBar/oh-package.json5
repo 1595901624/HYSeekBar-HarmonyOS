@@ -1,5 +1,5 @@
 {
-  "name": "hyseekbar",
+  "name": "@cloris/seekbar",
   "version": "1.0.0",
   "description": "This is a seek bar widget.",
   "main": "Index.ets",
@@ -11,5 +11,6 @@
     "SeekBar",
     "ProgressBar"
   ],
+  "homepage": "https://github.com/1595901624",
   "dependencies": {}
 }

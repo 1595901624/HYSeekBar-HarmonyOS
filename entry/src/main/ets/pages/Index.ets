@@ -1,4 +1,4 @@
-import { HYSeekBar, HYSeekBarDirection } from 'HYSeekBar';
+import { HYSeekBar, HYSeekBarDirection } from '@cloris/seekbar';
 
 @Entry
 @Component

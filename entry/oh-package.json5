@@ -7,7 +7,7 @@
   "license": "",
   "dependencies": {
 //    "HYSeekBar": "file:../lib/HYSeekBar.har"
-    "HYSeekBar": "file:../HYSeekBar"
+    "@cloris/seekbar": "file:../HYSeekBar"
   }
 }
 
